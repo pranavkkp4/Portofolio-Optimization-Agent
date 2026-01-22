@@ -1,56 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>News‑Aware Portfolio Optimization Agent</title>
-    <link rel="stylesheet" href="/static/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio Optimization Agent</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-    <h1>News‑Aware Portfolio Optimization Agent</h1>
-    <p>Use this tool to obtain a simple trading recommendation based on the
-    most recent return of your asset and the sentiment of a relevant news
-    headline. This demonstration uses a Q‑learning policy trained on synthetic
-    data to illustrate how qualitative news signals can complement quantitative
-    price information when making investment decisions.</p>
 
-    <form id="predict-form">
-        <label for="return_value">Previous Day Return (e.g. 0.01 for +1%)</label>
-        <input type="number" id="return_value" name="return_value" step="any" required />
+  <!-- NAVBAR -->
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a class="brand" href="#top">Portfolio Agent</a>
+      </div>
 
-        <label for="news_text">News Headline or Summary</label>
-        <textarea id="news_text" name="news_text" rows="3" required></textarea>
+      <nav class="nav-center" aria-label="Primary">
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#research">Research</a>
+        <a class="nav-link" href="#faq">FAQ</a>
+      </nav>
 
-        <button type="submit">Get Recommendation</button>
-    </form>
+      <div class="nav-right">
+        <!-- Optional: change this to your repo URL or remove entirely -->
+        <a class="nav-cta" href="https://github.com/pranavkkp4/Portofolio-Optimization-Agent" target="_blank" rel="noreferrer">
+          GitHub
+        </a>
+      </div>
+    </div>
+  </header>
 
-    <div id="result"></div>
+  <main class="page" id="top">
 
-    <script>
-    document.getElementById('predict-form').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const returnValue = parseFloat(document.getElementById('return_value').value);
-        const newsText = document.getElementById('news_text').value;
-        // Build form data for POST request
-        const formData = new URLSearchParams();
-        formData.append('return_value', returnValue);
-        formData.append('news_text', newsText);
-        try {
-            const response = await fetch('/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData.toString()
-            });
-            const data = await response.json();
-            document.getElementById('result').innerHTML =
-                `<h2>Recommendation</h2><p>${data.suggestion}</p>`;
-        } catch (err) {
-            document.getElementById('result').innerHTML =
-                `<p class="error">Error: ${err}</p>`;
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <h1 class="title">News-Aware Portfolio Optimization Agent</h1>
+        <p class="subtitle">
+          Reinforcement learning agent that combines time-series returns with NLP sentiment to recommend a conservative portfolio action.
+        </p>
+
+        <!-- CONTROL PANEL -->
+        <section class="card">
+          <h2 class="card-title">Run a Prediction</h2>
+
+          <form id="predict-form" class="form">
+            <div class="field">
+              <label for="return_value">Previous Day Return (e.g., 0.01 = +1%)</label>
+              <input type="number" id="return_value" name="return_value" step="0.0001" value="0.01" required />
+            </div>
+
+            <div class="field">
+              <label for="news_text">News Headline</label>
+              <textarea id="news_text" name="news_text" rows="3"
+                placeholder="e.g., record profit growth and bullish outlook" required></textarea>
+            </div>
+
+            <button type="submit" class="btn">Get Recommendation</button>
+          </form>
+
+          <div id="result" class="result"></div>
+
+          <!-- Developer Insights dropdown -->
+          <details id="dev-details" class="dev" style="display:none;">
+            <summary>Developer Insights</summary>
+            <pre id="dev-output"></pre>
+          </details>
+
+          <p class="hint">
+            Tip: For stronger “Invest” signals, try return <code>0.03</code> and a headline like
+            <code>record profit growth surge bullish outlook</code>.
+          </p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <div class="section-inner card">
+        <h2 class="section-title">About</h2>
+        <p>
+          This project demonstrates an end-to-end ML workflow: an RL policy trained on sequential market states,
+          sentiment feature extraction from text, and a FastAPI service with a web UI for interactive inference.
+        </p>
+      </div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section class="section" id="research">
+      <div class="section-inner card">
+        <h2 class="section-title">Research</h2>
+        <ul class="list">
+          <li>State design: discretized return + sentiment polarity</li>
+          <li>Policy: Q-learning with tabular Q-values</li>
+          <li>Deployment: FastAPI endpoint + UI + interpretability via Developer Insights</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="section-inner card">
+        <h2 class="section-title">FAQ</h2>
+        <div class="faq">
+          <h3>Why does it often recommend “Stay in cash”?</h3>
+          <p>
+            The learned policy is intentionally conservative: cash has no downside and the agent invests only when
+            state signals strongly favor it.
+          </p>
+
+          <h3>Is GitHub Pages able to run the API?</h3>
+          <p>
+            GitHub Pages is static hosting only. The FastAPI server runs locally (or on a separate hosting provider).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>Built with FastAPI • RL • NLP • Time Series</span>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    const form = document.getElementById("predict-form");
+    const resultDiv = document.getElementById("result");
+    const devDetails = document.getElementById("dev-details");
+    const devOutput = document.getElementById("dev-output");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const returnValue = document.getElementById("return_value").value;
+      const newsText = document.getElementById("news_text").value;
+
+      resultDiv.innerHTML = "";
+      devDetails.style.display = "none";
+      devOutput.textContent = "";
+
+      const formData = new FormData();
+      formData.append("return_value", returnValue);
+      formData.append("news_text", newsText);
+
+      try {
+        const response = await fetch("/predict", { method: "POST", body: formData });
+
+        if (!response.ok) {
+          const txt = await response.text();
+          resultDiv.innerHTML = `<p class="error">Request failed: ${response.status}. ${txt}</p>`;
+          return;
         }
+
+        const data = await response.json();
+
+        resultDiv.innerHTML = `
+          <div class="result-box">
+            <div class="result-label">Recommendation</div>
+            <div class="result-value">${data.suggestion}</div>
+          </div>
+        `;
+
+        if (data.developer_insights) {
+          devDetails.style.display = "block";
+          devOutput.textContent = JSON.stringify(data.developer_insights, null, 2);
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `<p class="error">Error: ${err}</p>`;
+      }
     });
-    </script>
+  </script>
+
 </body>
 </html>
