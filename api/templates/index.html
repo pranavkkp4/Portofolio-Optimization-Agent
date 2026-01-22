@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>News‑Aware Portfolio Optimization Agent</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>News‑Aware Portfolio Optimization Agent</h1>
+    <p>Use this tool to obtain a simple trading recommendation based on the
+    most recent return of your asset and the sentiment of a relevant news
+    headline. This demonstration uses a Q‑learning policy trained on synthetic
+    data to illustrate how qualitative news signals can complement quantitative
+    price information when making investment decisions.</p>
+
+    <form id="predict-form">
+        <label for="return_value">Previous Day Return (e.g. 0.01 for +1%)</label>
+        <input type="number" id="return_value" name="return_value" step="any" required />
+
+        <label for="news_text">News Headline or Summary</label>
+        <textarea id="news_text" name="news_text" rows="3" required></textarea>
+
+        <button type="submit">Get Recommendation</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+    document.getElementById('predict-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const returnValue = parseFloat(document.getElementById('return_value').value);
+        const newsText = document.getElementById('news_text').value;
+        // Build form data for POST request
+        const formData = new URLSearchParams();
+        formData.append('return_value', returnValue);
+        formData.append('news_text', newsText);
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
+            });
+            const data = await response.json();
+            document.getElementById('result').innerHTML =
+                `<h2>Recommendation</h2><p>${data.suggestion}</p>`;
+        } catch (err) {
+            document.getElementById('result').innerHTML =
+                `<p class="error">Error: ${err}</p>`;
+        }
+    });
+    </script>
+</body>
+</html>
