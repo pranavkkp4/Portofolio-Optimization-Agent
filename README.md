@@ -1,157 +1,261 @@
-# News‑Aware Portfolio Optimization Agent
+News-Aware Portfolio Optimization Agent
 
-This project is a self‑contained demonstration of how *reinforcement learning* and
-*sentiment analysis* can be combined to make simple trading decisions. The
-approach is motivated by research showing that adding qualitative signals from
-financial news to an RL trading system can improve performance compared to
-models that rely solely on price data. For example, a 2024 study showed that
-RL models enhanced with sentiment features achieved higher net worth and
-cumulative profits than those without sentiment and even outperformed a
-buy‑and‑hold baseline in portfolio experiments【930120649791441†L70-L79】. The same
-study emphasised that RL excels at adapting strategies in complex markets but
-traditionally ignores qualitative factors such as market mood【930120649791441†L89-L99】;
-integrating sentiment helps bridge this gap【930120649791441†L103-L109】.
+Reinforcement Learning • Time Series • NLP • FastAPI
 
-## Project overview
+Overview
 
-The repository contains a minimal end‑to‑end implementation of a *news‑aware
-portfolio optimization agent*. It includes:
+This project is an end-to-end machine learning system that demonstrates how sequential decision-making models can combine time-series market signals with natural-language news sentiment to produce conservative, interpretable portfolio recommendations.
 
-* **Synthetic data generator**: Creates price and sentiment series for training. A
-  random walk with a small upward drift simulates the asset price, while
-  discrete sentiment scores \(-1, 0, 1\) model daily market mood.
-* **Trading environment**: Implements a simple reinforcement learning
-  environment (`TradingEnv` in `env.py`) where the agent decides between two
-  actions: invest fully in the asset or stay in cash. Rewards are proportional
-  to the daily return if the agent invests.
-* **Q‑learning trainer**: Uses Q‑learning to learn a policy that maps
-  discretised price returns and sentiment signals to actions. After training,
-  the resulting Q‑table is saved as `model.pkl`.
-* **FastAPI server**: Exposes a small API (`api/main.py`) with two endpoints:
-  - `GET /` serves a dark‑themed web interface where users can input the
-    previous day’s return and a news headline and obtain a recommendation.
-  - `POST /predict` accepts form data and returns a JSON object with the
-    recommended action and a human‑readable suggestion.
-* **Web UI**: A minimal HTML/JavaScript page (`api/templates/index.html`) and
-  associated CSS (`api/static/style.css`) implementing a dark background with
-  blue and silver accents. The front‑end sends requests to the API and displays
-  the resulting recommendation.
+The system is designed to showcase model design and optimization, feature engineering, reinforcement learning, and production-oriented deployment—all core skills for a Machine Learning Engineer role.
 
-Despite the simplicity of the demo—synthetic data, discrete states and
-coarse sentiment—the project illustrates how one can combine time‑series data,
-NLP techniques and RL in a cohesive system. It serves as a template that can
-be extended with real price feeds, richer sentiment analysis (e.g. FinBERT
-embeddings) and more sophisticated RL algorithms (e.g. deep Q‑networks or
-policy gradient methods)【930120649791441†L70-L79】.
+Problem Statement
 
-## Installation and setup
+Portfolio decisions are inherently sequential and uncertain.
+In real-world ML systems, teams must:
 
-This project was developed using Python 3.9 and requires only a few third‑party
-libraries. To set up a virtual environment and install dependencies, run:
+Combine structured time-series data (returns, momentum)
 
-```bash
+Incorporate unstructured signals (news text)
+
+Optimize decisions under delayed rewards
+
+Deploy models in a reliable, inspectable production environment
+
+This project addresses those challenges with a compact but realistic ML pipeline.
+
+Solution Architecture
+
+The system consists of four main components:
+
+Feature Extraction
+
+Time-series signal: recent return regime
+
+NLP signal: sentiment polarity from news text
+
+Reinforcement Learning Policy
+
+Tabular Q-learning agent
+
+Learns a policy mapping market states → portfolio actions
+
+Inference & Deployment
+
+FastAPI backend serving predictions
+
+Stateless, production-style API design
+
+Interpretability & UI
+
+Web interface for interactive inference
+
+“Developer Insights” panel exposing model internals
+
+How It Works
+1. Time-Series Processing
+
+The user provides a recent market return (e.g., previous day return).
+This value is discretized into a return regime (negative / neutral / positive), forming part of the RL state.
+
+2. NLP Feature Engineering
+
+A news headline is processed into a sentiment polarity score (negative / neutral / positive).
+This unstructured signal is fused with the time-series regime.
+
+3. State Representation
+
+The combined features form a compact discrete state:
+
+state = f(return_regime, sentiment_polarity)
+
+4. Reinforcement Learning Inference
+
+A trained Q-learning policy evaluates the state and outputs Q-values for each action:
+
+0: Stay in cash
+
+1: Invest (go long)
+
+The action with the highest Q-value is selected.
+
+5. Interpretability
+
+The UI exposes:
+
+State ID
+
+Sentiment score
+
+Q-values per action
+
+Selected action
+
+This makes the decision process transparent and debuggable, which is critical for production ML systems.
+
+Machine Learning Details
+State Space
+
+Return regime: {negative, neutral, positive}
+
+Sentiment polarity: {negative, neutral, positive}
+
+Combined into a discrete state index
+
+Action Space
+
+0: Stay in cash
+
+1: Invest
+
+Learning Algorithm
+
+Tabular Q-learning
+
+Off-policy, value-based reinforcement learning
+
+Exploration during training, greedy policy at inference
+
+Reward Signal
+
+Positive reward when invested during positive return regimes
+
+Neutral/negative reward when invested during adverse conditions
+
+Cash action provides a conservative baseline
+
+Why This Project Is Relevant for ML Engineering
+
+This project demonstrates:
+
+Model design & optimization
+
+State abstraction and reward shaping
+
+Conservative policy behavior under uncertainty
+
+Time-series reasoning
+
+Regime-based discretization
+
+Sequential decision context
+
+NLP processing
+
+Feature extraction from unstructured text
+
+Fusion of text + numeric signals
+
+Reinforcement learning
+
+Policy learning over time
+
+Action-value estimation
+
+Production deployment
+
+FastAPI inference service
+
+Clean separation of training vs inference
+
+Inspectable outputs for debugging
+
+MLOps awareness
+
+Deterministic inference
+
+Model artifact loading (model.pkl)
+
+Clear retraining workflow
+
+Web Interface
+
+The web UI allows users to:
+
+Enter a return value and news headline
+
+Receive a portfolio recommendation
+
+Inspect internal model reasoning via Developer Insights
+
+Screenshots of the UI (before input and after inference with insights) are included in the project’s GitHub Pages site.
+
+Running the Project Locally
+1. Create and activate a virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-pip install fastapi uvicorn jinja2 numpy scikit‑learn
-```
 
-Because the environment uses only NumPy and no deep learning libraries, it can
-run on modest hardware without GPU support. FastAPI and Uvicorn are used to
-serve the API and web UI.
-
-## Training the agent
-
-To train the Q‑learning agent and generate a Q‑table, run:
-
-```bash
-cd news_portfolio_rl
-python train.py
-```
-
-This command produces a file called `model.pkl` in the `news_portfolio_rl`
-directory. The script uses 200 training episodes by default; you can adjust
-`EPISODES` in `train.py` if you wish to train longer.
-
-### Understanding the synthetic environment
-
-The agent observes a discrete state representing two features:
-
-1. **Price return**: Categorised into down, flat and up buckets using ±0.2 % thresholds.
-2. **Sentiment score**: Computed from news text via a simple keyword list
-   (`env.POSITIVE_KEYWORDS` and `env.NEGATIVE_KEYWORDS`), producing −1,
-   0 or +1.
-
-These two dimensions create 9 possible states. The action space is {0 = stay
-in cash, 1 = invest fully}. Rewards are calculated as the product of the
-agent’s action and the asset’s return. Over many episodes the Q‑learning
-algorithm learns a table of expected returns for each state–action pair and
-tends to favour investing when recent returns and sentiment are positive.
-
-## Running the API and UI
-
-After training, start the FastAPI server from the project root:
-
-```bash
-uvicorn news_portfolio_rl.api.main:app --reload
-```
-
-Visit `http://127.0.0.1:8000/` in your browser to load the web interface. The
-page allows you to enter a recent return and a news headline. Press “Get
-Recommendation” and the agent will respond with either **Invest (go long)** or
-**Stay in cash**.
-
-### Deploying to GitHub Pages
-
-To publish the web UI via GitHub Pages, you can generate a static version of
-`index.html` and include the contents of `api/static` and `api/templates` in
-your repository’s `/docs` folder. GitHub Pages serves static assets from the
-`docs` directory by default. The API requires a Python server and therefore
-cannot run on GitHub Pages alone; however, you can host the API separately or
-use the static UI to call an API deployed on another service.
-
-## Customising the agent
-
-This project is intentionally simple to make it easy to understand and extend.
-Here are some ideas for further development:
-
-* **Use real data:** Replace `create_synthetic_data` with a loader for
-  historical price series (e.g. from Yahoo Finance or a CSV) and parse
-  timestamps of actual news articles. See the literature for examples of
-  sentiment‑enhanced RL outperforming baselines【930120649791441†L70-L79】.
-* **Improve sentiment analysis:** Swap the keyword list for a more
-  sophisticated model such as VADER or a transformer (e.g. BERT). Financial
-  news sentiment has been shown to correlate with short‑term price movements
-  and volatility【930120649791441†L143-L149】.
-* **Enhance the RL algorithm:** Replace the discrete Q‑learning with a
-  function‑approximation method (e.g. deep Q‑networks or PPO) to handle
-  continuous state spaces. Research demonstrates that RL agents adaptively
-  optimise trading strategies by maximising cumulative returns【930120649791441†L129-L134】.
-
-## Directory structure
-
-```
-news_portfolio_rl/
-├── api/
-│   ├── main.py         # FastAPI application
-│   ├── static/
-│   │   └── style.css   # Dark‑themed CSS
-│   └── templates/
-│       └── index.html  # Web UI template
-├── env.py              # Environment and helper functions
-├── train.py            # Q‑learning training script
-├── model.pkl           # Saved Q‑table (generated after training)
-├── README.md           # Project documentation
-└── requirements.txt    # Dependencies (optional)
-```
-
-## Requirements file
-
-A `requirements.txt` file is provided for convenience. Install dependencies via:
-
-```bash
+2. Install dependencies
 pip install -r requirements.txt
-```
+pip install python-multipart
 
-## License
+3. Train the model
 
-This project is released under the MIT License. See `LICENSE` for details.
+This generates the Q-table used for inference.
+
+python train.py
+
+4. Start the FastAPI server
+uvicorn api.main:app --reload
+
+5. Open the app
+http://127.0.0.1:8000/
+
+GitHub Pages Project Site
+
+This repository also includes a static project site used as a portfolio showcase.
+
+Preview locally
+python3 -m http.server 5500
+
+
+Open:
+
+http://127.0.0.1:5500/docs/
+
+Publish on GitHub Pages
+
+Repo → Settings → Pages
+
+Source: Deploy from branch
+
+Branch: main
+
+Folder: /docs
+
+Limitations & Future Improvements
+
+To move from a portfolio demonstration to a production-ready trading system:
+
+Replace synthetic inputs with point-in-time aligned market and news data
+
+Add transaction costs and slippage
+
+Implement walk-forward backtesting
+
+Expand action space to include position sizing
+
+Replace tabular Q-learning with function approximation (e.g., DQN)
+
+These extensions are intentionally left out to keep the project focused on clarity, interpretability, and core ML concepts.
+
+Technologies Used
+
+Python
+
+NumPy
+
+Scikit-learn
+
+FastAPI
+
+Jinja2
+
+Reinforcement Learning (Q-learning)
+
+Time-series feature engineering
+
+NLP sentiment processing
+
+One-Line Summary
+
+Reinforcement-learning portfolio optimization agent combining time-series market signals and NLP sentiment, deployed via FastAPI with an interpretable web interface.
