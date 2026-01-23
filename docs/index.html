@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News-Aware Portfolio Optimization Agent</title>
+  <meta name="description" content="Reinforcement learning portfolio optimization agent combining time-series market data with NLP sentiment."/>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body id="top">
+
+  <!-- NAVBAR -->
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand">Portfolio Agent</div>
+
+      <nav class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#ml">ML System</a>
+        <a href="#demo">Demo</a>
+        <a href="#run">Run Locally</a>
+      </nav>
+
+      <a class="nav-btn" href="https://github.com/pranavkkp4/Portofolio-Optimization-Agent" target="_blank">
+        GitHub
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <span class="tag">RL · NLP · TIME SERIES</span>
+        <h1>
+          News-Aware Portfolio<br/>
+          Optimization Agent
+        </h1>
+        <p>
+          A reinforcement-learning trading agent that fuses numerical market signals
+          with natural-language news sentiment, deployed via FastAPI with full model
+          interpretability.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#demo" class="btn primary">View Demo</a>
+          <a href="#run" class="btn secondary">Run Locally</a>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <img src="./assets/Home Page.png" alt="Portfolio agent home screen" />
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section class="section" id="overview">
+    <h2>Project Overview</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Problem</h3>
+        <p>
+          Portfolio decisions are sequential and uncertain. Real systems must integrate
+          structured time-series data with unstructured information such as news.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Solution</h3>
+        <p>
+          This project implements a reinforcement-learning agent that learns when to
+          invest or stay in cash using return regimes and sentiment polarity.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ML DETAILS -->
+  <section class="section" id="ml">
+    <h2>Machine Learning System</h2>
+
+    <div class="grid three">
+      <div class="card">
+        <h3>State</h3>
+        <ul>
+          <li>Return regime (neg / neutral / pos)</li>
+          <li>Sentiment polarity (neg / neutral / pos)</li>
+          <li>Discrete state encoding</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Actions</h3>
+        <ul>
+          <li>0 — Stay in cash</li>
+          <li>1 — Invest</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Learning</h3>
+        <ul>
+          <li>Tabular Q-learning</li>
+          <li>Reward-based optimization</li>
+          <li>Greedy policy at inference</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="section" id="demo">
+    <h2>Demo Screenshots</h2>
+
+    <div class="grid">
+      <figure class="card image-card">
+        <img src="./assets/Home Page.png" alt="Home page before input" />
+        <figcaption>Initial UI before user input</figcaption>
+      </figure>
+
+      <figure class="card image-card">
+        <img src="./assets/Dev Pic.png" alt="Developer insights open" />
+        <figcaption>Prediction with Developer Insights expanded</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- RUN -->
+  <section class="section" id="run">
+    <h2>Run Locally</h2>
+
+    <div class="grid">
+      <div class="card">
+        <h3>FastAPI Application</h3>
+        <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install python-multipart
+python train.py
+uvicorn api.main:app --reload</code></pre>
+        <p>Open <code>http://127.0.0.1:8000</code></p>
+      </div>
+
+      <div class="card">
+        <h3>GitHub Pages Preview</h3>
+        <pre><code>python3 -m http.server 5500</code></pre>
+        <p>Open <code>http://127.0.0.1:5500/docs</code></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>
+      Reinforcement Learning · NLP · Time Series · FastAPI
+    </p>
+  </footer>
+
+</body>
+</html>
